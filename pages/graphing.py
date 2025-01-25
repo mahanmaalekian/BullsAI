@@ -11,7 +11,6 @@ sampled_df["timestamp"] = pd.to_datetime(sampled_df["timestamp"])
 #print(sampled_df)
 df = pd.read_csv("data/hourly_stock_data.csv")
 
-
 # Convert the 'date' column to datetime format for easier filtering
 df["date"] = pd.to_datetime(df["date"])
 
@@ -63,26 +62,30 @@ def filter_data_by_period_end(df, period):
         end_date = start_date + pd.Timedelta(days=1)
     return df[(df["date"] >= start_date) & (df["date"] <= end_date)]
 
+def period_to_time(period)-> int:
+    if period == "5S":
+        return pd.Timedelta(seconds=5)
+    elif period == "30S":
+        return pd.Timedelta(seconds=30)
+    elif period == "1M":
+        return pd.Timedelta(minutes=1)
+    elif period == "3M":
+        return pd.Timedelta(minutes=3)
+    elif period == "6M":
+        return pd.Timedelta(minutes=6)
+    elif period == "10M":
+        return pd.Timedelta(minutes=10)
+    else:
+        raise ValueError(f"Invalid period: {period}")
+    
 
 def filter_data_by_period_start(df, period):
     """Filters the data based on the selected time period."""
     end_date = df["timestamp"].max()
     print("end date", end_date)
-    if period == "5S":
-        start_date = end_date - pd.Timedelta(seconds=5)
-    elif period == "30S":
-        start_date = end_date - pd.Timedelta(seconds=30)
-    elif period == "1M":
-        start_date = end_date - pd.Timedelta(minutes=1)
-    elif period == "3M":
-        start_date = end_date - pd.Timedelta(minutes=3)
-    elif period == "6M":
-        start_date = end_date - pd.Timedelta(minutes=6)
-    elif period == "10M":
-        start_date = end_date - pd.Timedelta(minutes=10)
-    else:
-        start_date = df["timestamp"].min()  # Default to full data if invalid input
-    return df[df["timestamp"] >= start_date]
+    start_date = end_date - period_to_time(period)
+
+    return df[df["timestamp"] >= start_date - pd.Timedelta(seconds=30) ]
 
 
 @callback(
@@ -91,7 +94,22 @@ def filter_data_by_period_start(df, period):
 )
 def update_time_series(feature, period):
     filtered_df = filter_data_by_period_start(sampled_df, period)
-    filtered_df2 = filter_data_by_period_end(df, period)
+    if filtered_df.empty:
+        print(f"Filtered dataframe is empty for period: {period}")
+        return px.line(title="No data available for the selected period")
+
+    current_date = filtered_df["timestamp"].max()
+    time_delta = period_to_time(period)
+    print(f"Updating figure with {len(filtered_df)} points")
+
     fig = px.line(filtered_df, x="timestamp", y=feature, title=f"{feature} Stock Price")
-    #fig.add_scatter(x=filtered_df2["date"], y=filtered_df2[ticker], mode='lines', name='end')
+    fig.update_layout(
+        xaxis=dict(
+            range=[current_date - time_delta, current_date],
+            title="Timestamp"
+        ),
+        yaxis=dict(title=feature.capitalize()),
+        template="plotly_white"
+    )
     return fig
+
