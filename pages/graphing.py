@@ -4,10 +4,14 @@ import plotly.express as px
 import pandas as pd
 
 # Load sample stock data
-foo = px.data.stocks()
-print(foo)
+df = pd.read_csv(r'data\trade_data_A_period_1.csv')
+sampled_df = df.sample(n=100, random_state=42)
+sampled_df = sampled_df.sort_values(by='timestamp')
+sampled_df["timestamp"] = pd.to_datetime(sampled_df["timestamp"])
+#print(sampled_df)
 df = pd.read_csv("data/hourly_stock_data.csv")
-print(df)
+
+
 # Convert the 'date' column to datetime format for easier filtering
 df["date"] = pd.to_datetime(df["date"])
 
@@ -28,17 +32,18 @@ layout = html.Div(
         html.H4("Stock Price Analysis"),
         html.P("Select Stock:"),
         dcc.RadioItems(options=["AAPL", "GOOG", "MFT"], value='AAPL', id='ticker'),
+        dcc.RadioItems(options=["price", "volume"], value='price', id='feature'),
 
         html.P("Select Start Time Period:"),
         dcc.Dropdown(
             id="time-period",
             options=[
-                {"label": "1 Day", "value": "1D"},
-                {"label": "5 Days", "value": "5D"},
-                {"label": "1 Month", "value": "1M"},
-                {"label": "3 Months", "value": "3M"},
-                {"label": "6 Months", "value": "6M"},
-                {"label": "1 Year", "value": "1Y"},
+                {"label": "5 Seconds", "value": "5S"},
+                {"label": "30 Seconds", "value": "30S"},
+                {"label": "1 Minute", "value": "1M"},
+                {"label": "3 Minutes", "value": "3M"},
+                {"label": "6 Minutes", "value": "6M"},
+                {"label": "10 Minutes", "value": "10M"},
             ],
             value="1M",
             clearable=False,
@@ -50,6 +55,7 @@ layout = html.Div(
 
 def filter_data_by_period_end(df, period):
     """Filters the data based on the selected time period."""
+
     start_date = df["date"].min()
     if period == "1D":
         end_date = start_date + pd.Timedelta(days=1)
@@ -60,31 +66,32 @@ def filter_data_by_period_end(df, period):
 
 def filter_data_by_period_start(df, period):
     """Filters the data based on the selected time period."""
-    end_date = df["date"].max()
-    if period == "1D":
-        start_date = end_date - pd.Timedelta(days=1)
-    elif period == "5D":
-        start_date = end_date - pd.Timedelta(days=5)
+    end_date = df["timestamp"].max()
+    print("end date", end_date)
+    if period == "5S":
+        start_date = end_date - pd.Timedelta(seconds=5)
+    elif period == "30S":
+        start_date = end_date - pd.Timedelta(seconds=30)
     elif period == "1M":
-        start_date = end_date - pd.DateOffset(months=1)
+        start_date = end_date - pd.Timedelta(minutes=1)
     elif period == "3M":
-        start_date = end_date - pd.DateOffset(months=3)
+        start_date = end_date - pd.Timedelta(minutes=3)
     elif period == "6M":
-        start_date = end_date - pd.DateOffset(months=6)
-    elif period == "1Y":
-        start_date = end_date - pd.DateOffset(years=1)
+        start_date = end_date - pd.Timedelta(minutes=6)
+    elif period == "10M":
+        start_date = end_date - pd.Timedelta(minutes=10)
     else:
-        start_date = df["date"].min()  # Default to full data if invalid input
-    return df[df["date"] >= start_date]
+        start_date = df["timestamp"].min()  # Default to full data if invalid input
+    return df[df["timestamp"] >= start_date]
 
 
 @callback(
     Output("time-series-chart", "figure"),
-    [Input("ticker", "value"), Input("time-period", "value")],
+    [Input("feature", "value"), Input("time-period", "value")],
 )
-def update_time_series(ticker, period):
-    filtered_df = filter_data_by_period_start(df, period)
+def update_time_series(feature, period):
+    filtered_df = filter_data_by_period_start(sampled_df, period)
     filtered_df2 = filter_data_by_period_end(df, period)
-    fig = px.line(filtered_df, x="date", y=ticker, title=f"{ticker} Stock Price")
+    fig = px.line(filtered_df, x="timestamp", y=feature, title=f"{feature} Stock Price")
     #fig.add_scatter(x=filtered_df2["date"], y=filtered_df2[ticker], mode='lines', name='end')
     return fig
