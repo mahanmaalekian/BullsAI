@@ -12,22 +12,24 @@ print(df)
 df["date"] = pd.to_datetime(df["date"])
 
 register_page(__name__, path="/graphing")
-# layout = html.Div(
-#     [
-#         html.H4("Stock Price Analysis"),
-#     ])
 layout = html.Div(
     [
-        html.H4("Stock Price Analysis"),
-        dcc.Graph(id="time-series-chart"),
-        html.P("Select Stock:"),
+        html.Div(className="header", children=[
+        html.A(href="/", children=[
+            html.Img(src="/assets/logo.png"),
+        ]),
         dcc.Dropdown(
             id="ticker",
+            className="dropdown",
             options=[{"label": stock, "value": stock} for stock in ["AAPL", "GOOG", "MCSFT"]],
             value="AAPL",
             clearable=False,
-        ),
-        html.P("Select Time Period:"),
+        ),]),
+        html.H4("Stock Price Analysis"),
+        html.P("Select Stock:"),
+        dcc.RadioItems(options=["AAPL", "GOOG", "MFT"], value='AAPL', id='ticker'),
+
+        html.P("Select Start Time Period:"),
         dcc.Dropdown(
             id="time-period",
             options=[
@@ -41,11 +43,22 @@ layout = html.Div(
             value="1M",
             clearable=False,
         ),
+        dcc.Graph(id="time-series-chart"),
+
     ]
 )
 
+def filter_data_by_period_end(df, period):
+    """Filters the data based on the selected time period."""
+    start_date = df["date"].min()
+    if period == "1D":
+        end_date = start_date + pd.Timedelta(days=1)
+    else:
+        end_date = start_date + pd.Timedelta(days=1)
+    return df[(df["date"] >= start_date) & (df["date"] <= end_date)]
 
-def filter_data_by_period(df, period):
+
+def filter_data_by_period_start(df, period):
     """Filters the data based on the selected time period."""
     end_date = df["date"].max()
     if period == "1D":
@@ -70,6 +83,8 @@ def filter_data_by_period(df, period):
     [Input("ticker", "value"), Input("time-period", "value")],
 )
 def update_time_series(ticker, period):
-    filtered_df = filter_data_by_period(df, period)
+    filtered_df = filter_data_by_period_start(df, period)
+    filtered_df2 = filter_data_by_period_end(df, period)
     fig = px.line(filtered_df, x="date", y=ticker, title=f"{ticker} Stock Price")
+    #fig.add_scatter(x=filtered_df2["date"], y=filtered_df2[ticker], mode='lines', name='end')
     return fig

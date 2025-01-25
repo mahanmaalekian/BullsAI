@@ -1,3 +1,25 @@
-h1, h2, h3, h4, h5, h6 {
-    color: hotpink
+*{
+    font-family: "YahooSans VF", YahooSans, "Yahoo Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
+
+.body{
+    padding: 5px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: hotpink;
+    font-size: 1.5em;
+}
+
+.header {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+    
+}
+
+.dropdown {
+    width: 40rem;
+}
+

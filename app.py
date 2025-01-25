@@ -5,8 +5,10 @@ app = Dash(__name__, use_pages=True)
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
     html.Div([
-        html.A("Home", href="/", style={}),
-        html.A("About", href="/about", style={}),
+        html.A(href="/", children=[
+        ]),
+
+        html.A("About", href="/about"),
         html.A("Graphing", href="/graphing"),
     ]),
     page_container  # This renders the appropriate page based on the URL.
