@@ -1,4 +1,5 @@
 # for graphs
+from pathlib import Path
 from dash import Dash, dcc, html, Input, Output, register_page, callback
 import plotly.express as px
 import plotly.graph_objects as go
@@ -20,6 +21,8 @@ layout = html.Div(
     className="container",
     children=
     [   
+        html.Div(id="hidden-div", style={"display": "none"}),  # Invisible element
+
         html.Div(className="sidebar", children=[
         html.H4("Stock Data"),
         html.P(id="top-price", children="Top Price: $0.00"),
@@ -35,10 +38,15 @@ layout = html.Div(
         dcc.Dropdown(
             id="stock-dropdown",
             className="dropdown",
-            options=[{"label": stock, "value": stock} for stock in ["AAPL", "GOOG", "MCSFT"]],
-            value="AAPL",
+            options=[{"label": stock, "value": stock} for stock in ["A", "B", "C", "D", "E"]],
+            value="A",
             clearable=False,
         ),]),
+        dcc.Dropdown(
+            id="day",
+            className="dropdown",
+            options=[{"label": day, "value": day} for day in ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15"]],
+        ),
         html.Div(className="filter-bar", id="time-periods", children=[
             html.Div([html.P("Past"), 
             dcc.RadioItems(options=["5S", "30S", "1M", "3M", "6M", "10M"], value='1M', id='time-period-past', inline=True),
@@ -60,6 +68,9 @@ layout = html.Div(
 
 
     ]),
+
+
+
 
 
 def calculate_30_sec_std(dataframe):
@@ -109,6 +120,20 @@ def filter_data_by_period_start(df, period):
     start_date = end_date - period_to_time(period)
 
     return df[df["timestamp"] >= start_date - pd.Timedelta(seconds=5) ]
+
+
+@callback(Output("hidden-div", "children"), [Input("day", "value"), Input("stock-dropdown", "value")])
+def update_df(day, stock):
+    global df, sampled_df  # Access the global variables
+
+    path = Path('data') / stock / f'clean_trade_data_{stock}{day}.csv'
+    df = pd.read_csv(path)
+    sampled_df = df.sort_values(by='timestamp')
+    sampled_df["timestamp"] = pd.to_datetime(sampled_df["timestamp"])
+
+    return ""
+
+
 
 
 @callback(
