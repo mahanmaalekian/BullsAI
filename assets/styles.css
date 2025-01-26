@@ -9,22 +9,63 @@ p{
 }
 
 body{
-    background: linear-gradient(to bottom right,  black, #7f7e83 );
+    background: linear-gradient(to bottom right,  black, #212020 );
     color:#c9b375;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+
+}
+
+.sidebar {
+    margin: 0px 40px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    align-items: center;
+    width: 20%;
+    height: 100vh;
+    background-color: #212020;
+    color: #c9b375;
+    font-family: 'Roboto', sans-serif !important;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
 
 }
 
 h1, h2, h3, h4, h5, h6 {
     color: #c9b375;
     font-size: 1.5em;
+    font-family: 'Roboto', sans-serif !important;
+}
+
+.container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+    width: 100%;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+    width: 100%;
 }
 
 .header {
     display: flex;
     width: 100%;
-    justify-content: flex-start;
+    justify-content: space-betweens;
     align-items: center;
     background-color: transparent;
+    flex-direction: row;
+    font-size: 'Yahoo Sans Bold Regular';
     
 }
 
@@ -50,3 +91,61 @@ h1, h2, h3, h4, h5, h6 {
     margin-bottom: 1rem;
 }
 
+
+.Select-value{
+    background-color: #e0c785;
+}
+
+/* Style the filter bar */
+.filter-bar {
+    display: flex;
+    justify-content: center; /* Center the options horizontally */
+    margin: 20px 0;
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+}
+
+/* Style individual options */
+.filter-bar label {
+    padding: 8px 12px; /* Add spacing around options */
+    border-radius: 5px; /* Rounded corners */
+    margin-right: 8px; /* Space between options */
+    cursor: pointer; /* Pointer cursor for interactivity */
+    transition: all 0.2s ease; /* Smooth hover effect */
+}
+
+/* Highlight the selected option */
+.filter-bar input[type="radio"]:checked + label {
+    background-color: #e0c785;
+    color: #007bff; /* Blue text */
+    border-color: #007bff; /* Blue border */
+    font-weight: bold;
+}
+
+/* Hover effect */
+.filter-bar label:hover {
+    background-color: #e0c785; /* Light gray hover effect */
+}
+
+.sidebar::before {
+    height: 100%;
+    background: linear-gradient(
+      120deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(77, 75, 75, 0.5) 50%,
+      rgba(255, 255, 255, 0.1) 100%
+    );
+    transform: translateX(0);
+    animation: sidebar-shine 3s infinite linear;
+    z-index: 1;
+    pointer-events: none;
+}
+
+@keyframes sidebar-shine {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }

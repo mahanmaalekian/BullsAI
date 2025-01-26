@@ -17,7 +17,17 @@ df["date"] = pd.to_datetime(df["date"])
 
 register_page(__name__, path="/graphing")
 layout = html.Div(
-    [
+    className="container",
+    children=
+    [   
+        html.Div(className="sidebar", children=[
+        html.H4("Stock Data"),
+        html.P(id="top-price", children="Top Price: $0.00"),
+        html.P("Select a time period to view the stock data."),
+    ]),
+        html.Div(
+        className="content", children=
+        [
         html.Div(className="header", children=[
         html.A(href="/", children=[
             html.Img(src="/assets/logo.png"),
@@ -29,19 +39,25 @@ layout = html.Div(
             value="AAPL",
             clearable=False,
         ),]),
-        html.H4("Stock Price Analysis"),
-        html.Div(id="time-periods", children=[
+        html.Div(className="filter-bar", id="time-periods", children=[
             html.Div([html.P("Past"), 
             dcc.RadioItems(options=["5S", "30S", "1M", "3M", "6M", "10M"], value='1M', id='time-period-past', inline=True),
                       ]),
             html.Div([html.P("Future"),
             dcc.RadioItems(options=["5S", "30S", "1M", "3M", "6M", "10M"], value='1M', id='time-period-future', inline=True),
-        ]),]),
-        dcc.Graph(id="time-series-chart"),
-        html.H4("Volume Analysis"),
-        dcc.Graph(id="volume-chart"),
+            
+        ]),
+        
+        
+        ]),
+        html.H4("STOCK PRICE ANALYSIS"),
+        dcc.Graph(id="time-series-chart", style={"width": "90%"}),
+        html.H4("VOLUME ANALYSIS"),
+        dcc.Graph(id="volume-chart", style={"width": "90%", "height": "300px"}),
+        html.H4("ROLLING STANDARD DEVIATION"),
+        dcc.Graph(id='line-graph',style={"width": "90%", "height": "300px"})
+    ]),
 
-        dcc.Graph(id='line-graph',)
 
     ]),
 
@@ -96,6 +112,15 @@ def filter_data_by_period_start(df, period):
 
 
 @callback(
+    Output("top-price", "children"),
+    [Input("time-period-past", "value")],
+)
+def stock_data(period):
+    filtered_df = filter_data_by_period_start(sampled_df, period)
+    max_price = filtered_df["price"].max()
+    return f"Top Price: ${max_price:.2f}"
+
+@callback(
     Output("time-series-chart", "figure"),
     [Input("time-period-past", "value")],
 )
@@ -116,7 +141,9 @@ def update_time_series(period):
             title="Timestamp"
         ),
         yaxis=dict(title="Price"),
-        template="plotly_white"
+            font=dict(color="#c9b375"),          # Global font color for titles and legends
+
+        template="plotly_dark"
     )
     return fig
 
@@ -157,7 +184,9 @@ def update_volume_chart(period):
             title="Timestamp"
         ),
         yaxis=dict(title="Volume"),
-        template="plotly_white"
+        font=dict(color="#c9b375"),          # Global font color for titles and legends
+
+        template="plotly_dark"
     )
     return fig
 
@@ -193,7 +222,8 @@ def update_standard_deviation_chart(period):
         title=f"Rolling Standard Deviation (Period: {period})",
         xaxis=dict(title="Timestamp"),
         yaxis=dict(title="Standard Deviation"),
-        template="plotly_white"
+        font=dict(color="#c9b375"),          # Global font color for titles and legends
+        template="plotly_dark"
     )
 
     return fig
