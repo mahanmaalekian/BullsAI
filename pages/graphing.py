@@ -26,27 +26,32 @@ layout = html.Div(
         html.Div(className="sidebar", children=[
         html.H4("Stock Data"),
         html.P(id="top-price", children="Top Price: $0.00"),
-        html.P("Select a time period to view the stock data."),
+        html.P(id="bottom-price", children="Bottom Price: $0.00"),
     ]),
         html.Div(
         className="content", children=
         [
-        html.Div(className="header", children=[
         html.A(href="/", children=[
             html.Img(src="/assets/logo.png"),
         ]),
+        html.Div(className="header", children=[
+ 
         dcc.Dropdown(
             id="stock-dropdown",
             className="dropdown",
             options=[{"label": stock, "value": stock} for stock in ["A", "B", "C", "D", "E"]],
             value="A",
             clearable=False,
-        ),]),
+        ),
         dcc.Dropdown(
             id="day",
             className="dropdown",
             options=[{"label": day, "value": day} for day in ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15"]],
+            value="1",
+            clearable=False,
         ),
+        ]),
+
         html.Div(className="filter-bar", id="time-periods", children=[
             html.Div([html.P("Past"), 
             dcc.RadioItems(options=["5S", "30S", "1M", "3M", "10M", "1H"], value='1M', id='time-period-past', inline=True),
@@ -63,13 +68,25 @@ layout = html.Div(
         html.H4("VOLUME ANALYSIS"),
         dcc.Graph(id="volume-chart", style={"width": "90%", "height": "300px"}),
         html.H4("ROLLING STANDARD DEVIATION"),
+        dcc.RadioItems(options=["30S", "60S"], value='30S', id='time-period-std-dev', inline=True),
         dcc.Graph(id='line-graph',style={"width": "90%", "height": "300px"})
     ]),
 
 
     ]),
 
+def calculate_60_sec_std(dataframe):
+    
+    df_copy = dataframe.copy()
 
+    # Set the timestamp as the index for rolling calculations
+    df_copy.set_index('timestamp', inplace=True)
+
+    # Calculate rolling standard deviation with a window of 30 seconds
+    rolling_std_dev = df_copy['price'].rolling(window=60, min_periods=1).std().reset_index()
+    rolling_std_dev.columns = ['timestamp', '30_sec_rolling_std_dev']
+
+    return rolling_std_dev
 
 
 
@@ -122,7 +139,7 @@ def filter_data_by_period_start(df, period):
     return df[df["timestamp"] >= start_date - pd.Timedelta(seconds=5) ]
 
 
-@callback(Output("hidden-div", "children"), [Input("day", "value"), Input("stock-dropdown", "value")])
+#callback(Output("time-series-chart", "figure"), [Input("day", "value"), Input("stock-dropdown", "value"), Input("time-period-past", "value")])
 def update_df(day, stock):
     global df, sampled_df  # Access the global variables
 
@@ -131,25 +148,36 @@ def update_df(day, stock):
     sampled_df = df.sort_values(by='timestamp')
     sampled_df["timestamp"] = pd.to_datetime(sampled_df["timestamp"])
 
-    return ""
 
 
 
 
 @callback(
     Output("top-price", "children"),
-    [Input("time-period-past", "value")],
+    [Input("time-period-past", "value"), Input("day", "value"), Input("stock-dropdown", "value"),],
 )
-def stock_data(period):
+def stock_data(period, day, stock):
+    update_df(day, stock)
     filtered_df = filter_data_by_period_start(sampled_df, period)
     max_price = filtered_df["price"].max()
     return f"Top Price: ${max_price:.2f}"
 
 @callback(
-    Output("time-series-chart", "figure"),
-    [Input("time-period-past", "value")],
+    Output("bottom-price", "children"),
+    [Input("time-period-past", "value"), Input("day", "value"), Input("stock-dropdown", "value"),],
 )
-def update_time_series(period):
+def stock_data_bottom(period, day, stock):
+    update_df(day, stock)
+    filtered_df = filter_data_by_period_start(sampled_df, period)
+    max_price = filtered_df["price"].min()
+    return f"Min Price: ${max_price:.2f}"
+
+@callback(
+    Output("time-series-chart", "figure"),
+    [Input("day", "value"), Input("stock-dropdown", "value"), Input("time-period-past", "value")],
+)
+def update_time_series(day, stock, period):
+    update_df(day, stock)
     filtered_df = filter_data_by_period_start(sampled_df, period)
     if filtered_df.empty:
         print(f"Filtered dataframe is empty for period: {period}")
@@ -174,9 +202,10 @@ def update_time_series(period):
 
 @callback(
     Output("volume-chart", "figure"),
-    [Input("time-period-past", "value")],
+    [Input("day", "value"), Input("stock-dropdown", "value"), Input("time-period-past", "value")],
 )
-def update_volume_chart(period):
+def update_volume_chart(day, stock, period):
+    update_df(day, stock)
     filtered_df = filter_data_by_period_start(sampled_df, period)
     if filtered_df.empty:
         print(f"Filtered dataframe is empty for period: {period}")
@@ -217,11 +246,15 @@ def update_volume_chart(period):
 
 @callback(
     Output("line-graph", "figure"),  # Update the figure of 'line-graph'
-    [Input("time-period-past", "value")]
+    [Input("day", "value"), Input("stock-dropdown", "value"), Input("time-period-past", "value"), Input("time-period-std-dev", "value")]
 )
-def update_standard_deviation_chart(period):
+def update_standard_deviation_chart(day, stock, period, std_dev_period):
+    update_df(day, stock)
     # Calculate rolling standard deviation for the full DataFrame
-    standard_dev_df = calculate_30_sec_std(sampled_df)
+    if std_dev_period == "60S":
+        standard_dev_df = calculate_60_sec_std(sampled_df)
+    else:
+        standard_dev_df = calculate_30_sec_std(sampled_df)
     
     # Filter the data based on the selected period
     filtered_df = filter_data_by_period_start(standard_dev_df, period)
