@@ -6,16 +6,14 @@ import plotly.graph_objects as go
 import pandas as pd
 
 # Load sample stock data
-df = pd.read_csv(r'data\trade_data_A_period_1.csv')
+#df = pd.read_csv(r'data\trade_data_A_period_1.csv')
 #sampled_df = df.sample(n=100, random_state=42)
-sampled_df = df.sort_values(by='timestamp')
-sampled_df["timestamp"] = pd.to_datetime(sampled_df["timestamp"])
-#print(sampled_df)
-df = pd.read_csv("data/hourly_stock_data.csv")
+df = None
+sampled_df = None
 df_predict = None
 sampled_df_predict = None
 # Convert the 'date' column to datetime format for easier filtering
-df["date"] = pd.to_datetime(df["date"])
+#df["date"] = pd.to_datetime(df["date"])
 
 register_page(__name__, path="/graphing")
 layout = html.Div(
@@ -154,6 +152,11 @@ def update_df(day, stock):
     sampled_df = df.sort_values(by='timestamp')
     sampled_df["timestamp"] = pd.to_datetime(sampled_df["timestamp"])
 
+    path = Path('pred')/f'pred_trade_data_{stock}{day}.csv'
+    df_predict = pd.read_csv(path)
+    sampled_df_predict = df_predict.sort_values(by='timestamp')
+    sampled_df_predict["timestamp"] = pd.to_datetime(sampled_df_predict["timestamp"])
+
 
 @callback(
     Output("average-price", "children"),
@@ -252,7 +255,7 @@ def update_time_series(day, stock, period):
 )
 def update_model_prediction(day, stock, period):
     update_df(day, stock)
-    filtered_df = filter_data_by_period_start(sampled_df, period)
+    filtered_df = filter_data_by_period_start(sampled_df_predict, period)
     if filtered_df.empty:
         print(f"Filtered dataframe is empty for period: {period}")
         return px.line(title="No data available for the selected period")
@@ -270,7 +273,7 @@ def update_model_prediction(day, stock, period):
         yaxis=dict(title="Price"),
             font=dict(color="#c9b375"),          # Global font color for titles and legends
 
-        template="plotly_dark"
+        template="plotly_white"
     )
     return fig
 
