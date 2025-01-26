@@ -49,10 +49,10 @@ layout = html.Div(
         ),
         html.Div(className="filter-bar", id="time-periods", children=[
             html.Div([html.P("Past"), 
-            dcc.RadioItems(options=["5S", "30S", "1M", "3M", "6M", "10M"], value='1M', id='time-period-past', inline=True),
+            dcc.RadioItems(options=["5S", "30S", "1M", "3M", "10M", "1H"], value='1M', id='time-period-past', inline=True),
                       ]),
             html.Div([html.P("Future"),
-            dcc.RadioItems(options=["5S", "30S", "1M", "3M", "6M", "10M"], value='1M', id='time-period-future', inline=True),
+            dcc.RadioItems(options=["5S", "30S", "1M", "3M", "10M", "1Hs"], value='1M', id='time-period-future', inline=True),
             
         ]),
         
@@ -105,10 +105,10 @@ def period_to_time(period)-> int:
         return pd.Timedelta(minutes=1)
     elif period == "3M":
         return pd.Timedelta(minutes=3)
-    elif period == "6M":
-        return pd.Timedelta(minutes=6)
     elif period == "10M":
         return pd.Timedelta(minutes=10)
+    elif period == "1H":
+        return pd.Timedelta(minutes=60)
     else:
         raise ValueError(f"Invalid period: {period}")
     
