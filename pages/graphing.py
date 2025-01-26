@@ -152,7 +152,7 @@ def update_df(day, stock):
     sampled_df = df.sort_values(by='timestamp')
     sampled_df["timestamp"] = pd.to_datetime(sampled_df["timestamp"])
 
-    path = Path('pred')/f'pred_trade_data_{stock}{day}.csv'
+    path = Path('pred_data')/ stock /f'pred_trade_data_{stock}{day}.csv'
     df_predict = pd.read_csv(path)
     sampled_df_predict = df_predict.sort_values(by='timestamp')
     sampled_df_predict["timestamp"] = pd.to_datetime(sampled_df_predict["timestamp"])
@@ -264,7 +264,7 @@ def update_model_prediction(day, stock, period):
     time_delta = period_to_time(period)
     print(f"Updating figure with {len(filtered_df)} points")
 
-    fig = px.line(filtered_df, x="timestamp", y="price", title=f"Stock Price")
+    fig = px.line(filtered_df, x="timestamp", y="Test prediction", title=f"Stock Price")
     fig.update_layout(
         xaxis=dict(
             range=[current_date - time_delta, current_date],
