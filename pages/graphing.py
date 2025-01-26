@@ -152,10 +152,12 @@ def update_df(day, stock):
     sampled_df = df.sort_values(by='timestamp')
     sampled_df["timestamp"] = pd.to_datetime(sampled_df["timestamp"])
 
-    path = Path('pred_data')/ stock /f'pred_trade_data_{stock}{day}.csv'
-    df_predict = pd.read_csv(path)
-    sampled_df_predict = df_predict.sort_values(by='timestamp')
-    sampled_df_predict["timestamp"] = pd.to_datetime(sampled_df_predict["timestamp"])
+    
+    if day == "15" or day == "16" or day == "17" or day == "18" or day == "19" or day == "20":
+        path = Path('pred_data')/ stock /f'pred_trade_data_{stock}{day}.csv'
+        df_predict = pd.read_csv(path)
+        sampled_df_predict = df_predict.sort_values(by='timestamp')
+        sampled_df_predict["timestamp"] = pd.to_datetime(sampled_df_predict["timestamp"])
 
 
 @callback(
@@ -273,7 +275,7 @@ def update_model_prediction(day, stock, period):
         yaxis=dict(title="Price"),
             font=dict(color="#c9b375"),          # Global font color for titles and legends
 
-        template="plotly_white"
+        template="plotly_dark"
     )
     return fig
 
