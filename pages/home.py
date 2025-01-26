@@ -6,7 +6,7 @@ dash.register_page(__name__, path="/")  # Register as the home page
 def layout():
     return html.Div(className="mahan", children=[
     html.Div([
-        html.H1("Welcome to the Auth0 Dash App", className="home-title"),
+        html.H1("Welcome to BullsAI", className="home-title"),
         html.P("This is the home page of your application.", className="home-subtitle"),
         
         html.Div(
