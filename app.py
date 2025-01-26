@@ -4,7 +4,10 @@ app = Dash(__name__, use_pages=True)
 
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
-    html.Div([
+    html.Div(
+        id="hidden-shit",
+        children=
+        [
         html.A(href="/", children=[
         ]),
 

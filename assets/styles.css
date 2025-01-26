@@ -73,9 +73,10 @@ h1, h2, h3, h4, h5, h6 {
 #stock-dropdown {
     margin: 0 auto;
     text-align: center;
-    width: 30rem;
+    width: 14rem;
     background-color: #dbc382;
     border-radius: 10rem;
+    font-weight: bold;
 }
 
 #time-period {
@@ -147,4 +148,9 @@ h1, h2, h3, h4, h5, h6 {
     100% {
       transform: translateX(100%);
     }
+  }
+
+
+  #hidden-shit > a {
+    display: none;
   }

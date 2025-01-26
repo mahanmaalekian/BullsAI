@@ -12,7 +12,8 @@ sampled_df = df.sort_values(by='timestamp')
 sampled_df["timestamp"] = pd.to_datetime(sampled_df["timestamp"])
 #print(sampled_df)
 df = pd.read_csv("data/hourly_stock_data.csv")
-
+df_predict = None
+sampled_df_predict = None
 # Convert the 'date' column to datetime format for easier filtering
 df["date"] = pd.to_datetime(df["date"])
 
@@ -27,6 +28,9 @@ layout = html.Div(
         html.H4("Stock Data"),
         html.P(id="top-price", children="Top Price: $0.00"),
         html.P(id="bottom-price", children="Bottom Price: $0.00"),
+        html.P(id="opening-price", children="Opening Price: $0.00"),
+        html.P(id="closing-price", children="Closing Price: $0.00"),
+        html.P(id="average-price", children="Average Price: $0.00"),
     ]),
         html.Div(
         className="content", children=
@@ -39,7 +43,7 @@ layout = html.Div(
         dcc.Dropdown(
             id="stock-dropdown",
             className="dropdown",
-            options=[{"label": stock, "value": stock} for stock in ["A", "B", "C", "D", "E"]],
+            options=[{"label": "Company " + stock, "value": stock} for stock in ["A", "B", "C", "D", "E"]],
             value="A",
             clearable=False,
         ),
@@ -143,7 +147,7 @@ def filter_data_by_period_start(df, period):
 
 #callback(Output("time-series-chart", "figure"), [Input("day", "value"), Input("stock-dropdown", "value"), Input("time-period-past", "value")])
 def update_df(day, stock):
-    global df, sampled_df  # Access the global variables
+    global df, sampled_df, df_predict, sampled_df_predict  # Access the global variables
 
     path = Path('data') / stock / f'clean_trade_data_{stock}{day}.csv'
     df = pd.read_csv(path)
@@ -151,8 +155,47 @@ def update_df(day, stock):
     sampled_df["timestamp"] = pd.to_datetime(sampled_df["timestamp"])
 
 
+@callback(
+    Output("average-price", "children"),
+    [Input("time-period-past", "value"), Input("day", "value"), Input("stock-dropdown", "value")],
+)
+def average_price(period, day, stock):
+    # Update the dataset based on the selected day and stock
+    update_df(day, stock)
+    
+    # Filter the data for the specified period
+    filtered_df = filter_data_by_period_start(sampled_df, period)
+    
+    # Check if the filtered DataFrame is empty to avoid errors
+    if filtered_df.empty:
+        return "No data available for the selected period"
+    
+    # Calculate the average price for the period
+    avg_price = filtered_df["price"].mean()
+    
+    # Return the average price as formatted text
+    return f"Average Price: ${avg_price:.2f}"
 
 
+@callback(
+    Output("closing-price", "children"),
+    [Input("time-period-past", "value"), Input("day", "value"), Input("stock-dropdown", "value"),],
+)
+def closing_price(period, day, stock):
+    update_df(day, stock)
+    filtered_df = filter_data_by_period_start(sampled_df, period)
+    last_price = filtered_df["price"].iloc[-1]
+    return f"Closing Price: ${last_price:.2f}"
+
+@callback(
+    Output("opening-price", "children"),
+    [Input("time-period-past", "value"), Input("day", "value"), Input("stock-dropdown", "value"),],
+)
+def opening_price(period, day, stock):
+    update_df(day, stock)
+    filtered_df = filter_data_by_period_start(sampled_df, period)
+    first_price = filtered_df["price"].iloc[0]
+    return f"Opening Price: ${first_price:.2f}"
 
 @callback(
     Output("top-price", "children"),
@@ -179,6 +222,35 @@ def stock_data_bottom(period, day, stock):
     [Input("day", "value"), Input("stock-dropdown", "value"), Input("time-period-past", "value")],
 )
 def update_time_series(day, stock, period):
+    update_df(day, stock)
+    filtered_df = filter_data_by_period_start(sampled_df, period)
+    if filtered_df.empty:
+        print(f"Filtered dataframe is empty for period: {period}")
+        return px.line(title="No data available for the selected period")
+
+    current_date = filtered_df["timestamp"].max()
+    time_delta = period_to_time(period)
+    print(f"Updating figure with {len(filtered_df)} points")
+
+    fig = px.line(filtered_df, x="timestamp", y="price", title=f"Stock Price")
+    fig.update_layout(
+        xaxis=dict(
+            range=[current_date - time_delta, current_date],
+            title="Timestamp"
+        ),
+        yaxis=dict(title="Price"),
+            font=dict(color="#c9b375"),          # Global font color for titles and legends
+
+        template="plotly_dark"
+    )
+    return fig
+
+#TODO: Implement the model prediction chart
+@callback(
+    Output("model-prediction", "figure"),
+    [Input("day", "value"), Input("stock-dropdown", "value"), Input("time-period-past", "value")],
+)
+def update_model_prediction(day, stock, period):
     update_df(day, stock)
     filtered_df = filter_data_by_period_start(sampled_df, period)
     if filtered_df.empty:
