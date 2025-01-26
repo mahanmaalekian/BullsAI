@@ -1,28 +1,52 @@
+@import url(https://db.onlinewebfonts.com/c/557602b15207c6d67bbdda171a4157dd?family=Yahoo+Sans+Bold+Regular);
+
 *{
-    font-family: "YahooSans VF", YahooSans, "Yahoo Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-family: 'Yahoo Sans Regular', Arial, sans-serif;
+
+}
+p{
+    margin: 0;
 }
 
-.body{
-    padding: 5px;
+body{
+    background: linear-gradient(to bottom right,  black, #7f7e83 );
+    color:#c9b375;
+
 }
 
 h1, h2, h3, h4, h5, h6 {
-    color: hotpink;
+    color: #c9b375;
     font-size: 1.5em;
 }
 
 .header {
     display: flex;
     width: 100%;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
+    background-color: transparent;
     
 }
 
-.dropdown {
-    width: 40rem;
+
+#stock-dropdown {
+    margin: 0 auto;
+    text-align: center;
+    width: 30rem;
+    background-color: #dbc382;
+    border-radius: 10rem;
 }
 
-#time-series-chart{
-    margin-bottom: 20vh;
+#time-period {
+    margin-bottom: 1rem;
 }
+
+#time-periods{
+    display: flex;
+    justify-content: space-between;
+}
+
+#feature {
+    margin-bottom: 1rem;
+}
+
