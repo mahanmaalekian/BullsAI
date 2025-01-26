@@ -46,7 +46,7 @@ layout = html.Div(
         dcc.Dropdown(
             id="day",
             className="dropdown",
-            options=[{"label": day, "value": day} for day in ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15"]],
+            options=[{"label": day, "value": day} for day in ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"]],
             value="1",
             clearable=False,
         ),
@@ -65,6 +65,8 @@ layout = html.Div(
         ]),
         html.H4("STOCK PRICE ANALYSIS"),
         dcc.Graph(id="time-series-chart", style={"width": "90%"}),
+        html.H4("MODEL PREDICTION"),
+        dcc.Graph(id="model-prediction", style={"width": "90%"}),
         html.H4("VOLUME ANALYSIS"),
         dcc.Graph(id="volume-chart", style={"width": "90%", "height": "300px"}),
         html.H4("ROLLING STANDARD DEVIATION"),
