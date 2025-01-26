@@ -154,3 +154,80 @@ h1, h2, h3, h4, h5, h6 {
   #hidden-shit > a {
     display: none;
   }
+
+
+
+  /* Home Page Container */
+.home-container {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #1a1a1a; /* Dark gray for the card background */
+    border: 1px solid #f4d03f; /* Gold border */
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(255, 223, 0, 0.3); /* Subtle gold shadow */
+    text-align: center;
+}
+
+/* Title Styling */
+.home-title {
+    font-size: 36px;
+    color: #f4d03f; /* Gold color for the title */
+    margin-bottom: 20px;
+}
+
+/* Subtitle Styling */
+.home-subtitle {
+    font-size: 18px;
+    color: #d4af37; /* Slightly muted gold */
+    margin-bottom: 30px;
+}
+
+/* Navigation Links Container */
+.nav-container {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+/* Navigation Links */
+.nav-link {
+    text-decoration: none;
+    color: #000000; /* Black text */
+    background-color: #f4d03f; /* Gold background for buttons */
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    transition: background-color 0.3s, transform 0.2s;
+    box-shadow: 0 2px 5px rgba(255, 223, 0, 0.3); /* Gold button shadow */
+}
+
+.nav-link:hover {
+    background-color: #d4af37; /* Muted gold on hover */
+    transform: translateY(-3px); /* Slight lift effect */
+}
+
+/* User Info Section */
+.user-info {
+    margin-top: 30px;
+    padding: 15px;
+    background-color: #262626; /* Slightly darker gray */
+    border: 1px solid #f4d03f; /* Gold border */
+    border-radius: 5px;
+    color: #f4d03f; /* Gold text */
+    box-shadow: 0 2px 5px rgba(255, 223, 0, 0.2); /* Subtle shadow */
+    font-size: 16px;
+    text-align: center;
+}
+
+.mahan {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin-left: 20rem;
+    margin-bottom: 40vh;
+}

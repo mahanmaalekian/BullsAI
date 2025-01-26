@@ -256,6 +256,16 @@ def update_time_series(day, stock, period):
     [Input("day", "value"), Input("stock-dropdown", "value"), Input("time-period-past", "value")],
 )
 def update_model_prediction(day, stock, period):
+    if day != "15" and day != "16" and day != "17" and day != "18" and day != "19" and day != "20":
+        df = pd.DataFrame()
+        empty_fig = go.Figure()
+        empty_fig.update_layout(
+            title="No Data Available",
+            xaxis_title="Timestamp",
+            yaxis_title="Stock Price",
+            template="plotly_dark",
+)
+        return empty_fig
     update_df(day, stock)
     filtered_df = filter_data_by_period_start(sampled_df_predict, period)
     if filtered_df.empty:
