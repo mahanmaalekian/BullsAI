@@ -41,8 +41,23 @@ layout = html.Div(
         html.H4("Volume Analysis"),
         dcc.Graph(id="volume-chart"),
 
+        dcc.Graph(id='line-graph',)
+
     ]),
 
+
+def calculate_30_sec_std(dataframe):
+    
+    df_copy = dataframe.copy()
+
+    # Set the timestamp as the index for rolling calculations
+    df_copy.set_index('timestamp', inplace=True)
+
+    # Calculate rolling standard deviation with a window of 30 seconds
+    rolling_std_dev = df_copy['price'].rolling(window=30, min_periods=1).std().reset_index()
+    rolling_std_dev.columns = ['timestamp', '30_sec_rolling_std_dev']
+
+    return rolling_std_dev
 
 def filter_data_by_period_end(df, period):
     """Filters the data based on the selected time period."""
@@ -146,3 +161,39 @@ def update_volume_chart(period):
     )
     return fig
 
+@callback(
+    Output("line-graph", "figure"),  # Update the figure of 'line-graph'
+    [Input("time-period-past", "value")]
+)
+def update_standard_deviation_chart(period):
+    # Calculate rolling standard deviation for the full DataFrame
+    standard_dev_df = calculate_30_sec_std(sampled_df)
+    
+    # Filter the data based on the selected period
+    filtered_df = filter_data_by_period_start(standard_dev_df, period)
+    
+    if filtered_df.empty:
+        print(f"Filtered dataframe is empty for period: {period}")
+        return go.Figure()  # Return an empty figure if no data
+    
+    # Create the figure for rolling standard deviation
+    fig = go.Figure()
+
+    # Add the rolling standard deviation line
+    fig.add_trace(go.Scatter(
+        x=filtered_df['timestamp'],
+        y=filtered_df['30_sec_rolling_std_dev'],
+        mode='lines',  # Line graph mode
+        name='Rolling Standard Deviation',
+        line=dict(color='blue')
+    ))
+
+    # Update the layout of the figure
+    fig.update_layout(
+        title=f"Rolling Standard Deviation (Period: {period})",
+        xaxis=dict(title="Timestamp"),
+        yaxis=dict(title="Standard Deviation"),
+        template="plotly_white"
+    )
+
+    return fig
